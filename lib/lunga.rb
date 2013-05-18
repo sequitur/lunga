@@ -73,6 +73,8 @@ class Group
 
 end
 
+class MissingAddressError < StandardError; end
+
 class FeedEntry
 
   # FeedEntry holds the DSL methods that actually define the Feed objects.
@@ -84,7 +86,10 @@ class FeedEntry
   def initialize (name, &proc)
     @name = name
     instance_eval(&proc)
-    @feed_obj = Feed.new(@feed_addr, @cutoff) if @link
+    unless @feed_addr
+      fail MissingAddressError, "No address given for feed #{name}"
+    end
+    @feed_obj = Feed.new(@feed_addr)
   end
 
   private
@@ -110,7 +115,7 @@ end
 class Feed
 
   # Holds the actual feed data.
-  attr :cutoff
+  attr :cutoff, :url
 
   def initialize (url, cutoff: (Time.now - 60 * 60 * 24))
     @url = url
@@ -140,7 +145,7 @@ class Feed
 
   def title
     # Alias for data nested deep in the rss object model.
-    data.channel.title
+    data.feed.title
   end
 
   private

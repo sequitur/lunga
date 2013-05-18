@@ -1,6 +1,58 @@
 require 'lunga'
 require 'time'
 
+describe Lunga do
+
+end
+
+describe Grouper do
+
+  context 'DSL' do
+
+    group 'my group' do
+
+      feed 'my feed' do
+        feed 'http://myaddre.ss'
+      end
+
+    end
+
+    group = Grouper.groups[-1]
+
+    it 'takes a DSL and spits out Group objects' do
+
+      group.should be_a_kind_of(Group)
+      group.name.should eq('my group')
+
+    end
+
+    it 'creates Group objects that hold feeds' do
+
+      group.feeds[0].should be_a_kind_of(Feed)
+      group.feeds[0].url.should eq('http://myaddre.ss')
+
+    end
+
+  end
+
+  it 'raises an error if the DSL is invalid' do
+    expect do
+
+      group 'wrong group' do
+        feed 'wrong feed' do
+        end
+      end
+
+    end.to raise_error(MissingAddressError)
+
+  end
+
+end
+
+describe Group do
+
+end
+
 describe Post do
 
   it 'holds post and feed data' do
@@ -36,7 +88,11 @@ shared_context 'after fetching a feed' do |feed|
   end
 
   it 'has a title method that gets its title from the channel data' do
-    feed.data.channel.title.should be_a_kind_of(String)
+    feed.title.should be_a_kind_of(String)
+  end
+
+  it 'holds a list of recent post objects, which may be empty' do
+    feed.recent.should be_a_kind_of(Array)
   end
 
 end
@@ -61,3 +117,4 @@ describe Feed do
   end
 
 end
+
