@@ -10,7 +10,7 @@ class Lunga
     rcfile = File.join(ENV['HOME'], '.lunga', 'feeds.rb')
     load rcfile
 
-    template = Templater.new(Time.now - (60 * 60 * 24))
+    template = Templater.new
 
     spoolfile = File.join(ENV['HOME'], '.lunga', 'spool.html')
     spool = File.new(spoolfile, 'w')
@@ -43,11 +43,17 @@ class Grouper
   def self.items_to_print
     # Figure out what's to be converted to html.
     to_print = []
+    puts 'Warning: Nothing to print' unless self.groups
     self.groups.each do |group|
+      puts 'Warning: No feeds' unless group.feeds
+      puts "Picking feeds for #{group}"
       group.feeds.each do |f|
+        puts "Getting recent for #{f}"
+        puts 'Warning: Nothing new' unless f.recent
         to_print << f.recent
       end
     end
+    puts "To print: #{to_print}"
     to_print.flatten.sort do |a, b|
       b.data.date <=> a.data.date
     end
@@ -125,7 +131,8 @@ class Feed
   def recent
     return [] if data == :not_available
     recent_items = data.items.select do |item|
-      item.date && item.date > @cutoff
+      item[:date] && item> @cutoff
+      true
     end
 
     recent_items.map do |item|
@@ -152,14 +159,12 @@ class Feed
 
   def fetch!
     puts "Fetching #{@url}"
-    begin
     open(@url) do |io|
       @data = SimpleRSS.parse io
     end
-    rescue OpenURI::HTTPError => error
+    rescue StandardError => error
       puts "Cannot open feed: #{error}, skipping"
       @data = :not_available
-    end
   end
 
 end
@@ -174,7 +179,7 @@ class Post
   end
 
   def link
-    @data.link
+    @data[:link]
   end
 
   def channel
@@ -182,20 +187,20 @@ class Post
   end
 
   def description
-    text = @data.content_encoded
-    text ||= @data.description
+    text = @data[:content_encoded]
+    text ||= @data[:description]
 
     # Strip out all <div> tags, so post content can't break formatting. We
     # wouldn't have to do this if html wasn't permissive.
-    text.gsub(/<\/?div.*>/, '')
+    text.gsub(/<\/?div.*>/n, '')
   end
 
   def title
-    @data.title
+    @data[:title]
   end
 
   def date
-    @data.date
+    @data[:date]
   end
 
 end
@@ -215,6 +220,8 @@ class Templater
   end
 
   def posts
+    puts "Listing posts..."
+    puts "To print: #{Grouper.items_to_print}"
     Grouper.items_to_print
   end
 

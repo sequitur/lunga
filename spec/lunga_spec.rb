@@ -1,10 +1,6 @@
 require 'lunga'
 require 'time'
 
-describe Lunga do
-
-end
-
 describe Grouper do
 
   context 'DSL' do
@@ -57,10 +53,9 @@ describe Post do
 
   it 'holds post and feed data' do
     date = Date.parse('2013-05-18')
-    rss = double('rss')
-    rss.stub(:content_encoded => '<p>Hello!</p>',
-             :link            => 'http://link.to',
-             :date            => date)
+    rss = { content_encoded: '<p>Hello!</p>',
+            link:            'http://link.to',
+            date:            date}
 
     feed = double('feed')
     feed.stub(:title => 'My brilliant feed')
