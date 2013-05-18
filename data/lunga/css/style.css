@@ -1,0 +1,100 @@
+
+body {
+  background: #141820;
+  font-family: "Droid Sans";
+}
+
+.container {
+  max-width: 54em;
+  margin: 0 auto;
+  padding: 0
+}
+
+.post {
+  border: 1px solid;
+  margin: 1em 0;
+  padding: 0;
+  box-shadow: 2px 2px 2px #000000;
+  background: linear-gradient(to bottom, #a0a0a0, #f0f0f0);
+}
+
+.post_title {
+  margin: 0;
+  border-bottom: 1px solid;
+  padding: 0 1em;
+  position: relative;
+}
+
+.post_title h1 {
+  margin: 2pt;
+  font-size: 20pt;
+  font-weight: normal;
+}
+
+.post_title a {
+  color: #101010;
+  text-decoration: none;
+}
+
+.post_title a:hover {
+  color: #303030;
+}
+
+div.buttons {
+  position: absolute;
+  right: 0;
+  top: 0;
+  margin: 1pt;
+}
+
+button {
+  padding 1pt;
+}
+
+button i {
+  color: #101010;
+}
+
+.post_info {
+  border-bottom: 1px solid;
+  padding: 2pt;
+  background: linear-gradient(to bottom, rgba(000,000,000,0)
+  , rgba(000,000,000,0.4));
+}
+
+.post_info ul {
+  list-style: none inside none;
+  padding: 0;
+  margin: 0;
+  position: relative;
+}
+
+.post_info li {
+  text-indent: 0;
+  padding-left: 0;
+  margin: 0;
+  font-size: 10pt;
+}
+
+.post_info li.date {
+  text-align: right;
+  position: absolute;
+  right: 0px;
+  top: 0;
+}
+
+.post_content {
+  padding: 1em;
+  background: rgba(255,255,255,0.6);
+}
+
+/* Generic Content Styles
+ *
+ * These rules will style elements inside the post, i.e., html elements
+ * included in the RSS content itself.
+ */
+
+.post_content img {
+  display: block;
+  margin: 0 auto;
+}

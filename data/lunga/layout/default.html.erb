@@ -1,0 +1,44 @@
+<!doctype html>
+<head>
+  <title>Lunga</title>
+
+  <link rel="stylesheet" href="<%= stylesheet %>"></link>
+  <link href="http://netdna.bootstrapcdn.com/font-awesome/3.1.1/css/font-awesome.css" rel="stylesheet"></link>
+
+  <script src="http://code.jquery.com/jquery-2.0.0.min.js"></script>
+  <script src="<%= script %>"></script>
+
+</head>
+
+<body>
+  <div class="container">
+    <% posts.each do |post| %>
+    <div class="post">
+      <div class="post_title">
+        <a href="<%= post.link %>">
+          <h1><%= post.title %></h1>
+        </a>
+        <div class="buttons">
+          <button class="minify-icon">
+            <i class="icon-minus icon-large"></i>
+          </button>
+          <button class="remove-icon">
+            <i class="icon-trash icon-large"></i>
+          </button>
+        </div>
+      </div>
+      <div class="post_info">
+        <ul>
+          <li><%= post.channel %></li>
+          <li class="date">
+            <%= post.date %>
+          </li>
+        </ul>
+      </div>
+      <div class="post_content">
+        <%= post.description %>
+      </div>
+    </div>
+    <% end %>
+  </div>
+</body>
