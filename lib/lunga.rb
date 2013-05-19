@@ -73,8 +73,8 @@ class Post
     # In which we try to guess where the feed encoder stashed the actual
     # content.
     text   = @raw_item[:content_encoded]
-    text ||= @raw_item[:content]
     text ||= @raw_item[:description]
+    text ||= @raw_item[:content]
     text ||= NO_POST_CONTENT
 
     sanitize(text)
@@ -83,8 +83,7 @@ class Post
   private
 
   def sanitize (text)
-    return DATA_MISSING unless text
-    text.gsub(/<\/?div>/, '')
+    text.gsub(/<\/?div.*>/, '')
   end
 
 end
@@ -123,11 +122,21 @@ class PostList < Array
   include Singleton
 
   def to_print
-    recent = select do |post|
-      post.date > Configuration.instance.cutoff
-    end
-    recent.sort do |a, b|
+    recent_posts.sort do |a, b|
       b.date <=> a.date
+    end
+  end
+
+  private
+
+  def recent_posts
+    select do |post|
+      if post.date
+        post.date > Configuration.instance.cutoff
+      else
+        puts "Can't find the date for post #{post.title}, skipping."
+        false
+      end
     end
   end
 
