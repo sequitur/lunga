@@ -1,0 +1,41 @@
+<rss version="2.0">
+  <channel>
+    <title>Balaclava Fashion</title>
+    <link>http://balaclava.io</link>
+    <description>Everything you need to know about balaclavas</description>
+    <language>en</language>
+    <item>
+      <title>Balaclava!</title>
+      <link>http://balaclava.io/3</link>
+      <description>
+        <p>
+          Balaclava balaclava balaclava!
+        </p>
+      </description>
+      <pubDate>Fri, 17 May 2013 04:00:00 -0000</pubDate>
+      <guid>http://balaclava.io/3</guid>
+    </item>
+    <item>
+      <title>Yet More Balaclavas!</title>
+      <link>http://balaclava.io/2</link>
+      <description>
+        <p>
+          Balaclava balaclava balaclava - Balaclava!
+        </p>
+      </description>
+      <pubDate>Thu, 16 May 2013 04:00:00 -0000</pubDate>
+      <guid>http://balaclava.io/2</guid>
+    </item>
+    <item>
+      <title>Test balaclava please ignore</title>
+      <link>http://balaclava.io/1</link>
+      <description>
+        <p>
+          Balaclava balaclava balaclava?
+        </p>
+      </description>
+      <pubDate>Wed, 15 May 2013 04:00:00 -0000</pubDate>
+      <guid>http://balaclava.io/1</guid>
+    </item>
+  </channel>
+</rss>

@@ -2,4 +2,4 @@
 
 require 'lunga'
 
-Lunga.generate
+Lunga.begin
