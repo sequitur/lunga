@@ -4,6 +4,14 @@ require 'open-uri'
 require 'erb'
 require 'time'
 
+NO_POST_CONTENT = <<EOF
+<p>
+  Oops! Something went wrong. I can't locate the content for this post.
+</p>
+EOF
+
+DATA_MISSING = 'Oops! There should be something here.'
+
 class Lunga
 
   def self.begin
@@ -50,7 +58,7 @@ class Post
   end
 
   def title
-    @raw_item[:title]
+    sanitize(@raw_item[:title])
   end
 
   def date
@@ -58,11 +66,24 @@ class Post
   end
 
   def link
-    @raw_item[:link]
+    sanitize(@raw_item[:link])
   end
 
   def description
-    text = @raw_item[:content_encoded] || @raw_item[:description]
+    # In which we try to guess where the feed encoder stashed the actual
+    # content.
+    text   = @raw_item[:content_encoded]
+    text ||= @raw_item[:content]
+    text ||= @raw_item[:description]
+    text ||= NO_POST_CONTENT
+
+    sanitize(text)
+  end
+
+  private
+
+  def sanitize (text)
+    return DATA_MISSING unless text
     text.gsub(/<\/?div>/, '')
   end
 
@@ -100,6 +121,15 @@ end
 
 class PostList < Array
   include Singleton
+
+  def to_print
+    recent = select do |post|
+      post.date > Configuration.instance.cutoff
+    end
+    recent.sort do |a, b|
+      b.date <=> a.date
+    end
+  end
 
 end
 
@@ -142,7 +172,8 @@ class FeedEntry
   end
 
   def generate
-    rss = SimpleRSS.parse(open(@url))
+    resource = open @url
+    rss = SimpleRSS.parse(resource)
     Feed.new(rss)
   end
 
@@ -168,7 +199,7 @@ class Templater
   end
 
   def posts
-    PostList.instance
+    PostList.instance.to_print
   end
 
 end
