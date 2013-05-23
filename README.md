@@ -30,8 +30,8 @@ Only from git for now. Clone the repository and do:
 
 ```bash
 gem build lunga.gemspec
-gem install simple-rss # If you don't have it already
-gem install lunga-0.2.0.gem
+gem install feedzirra # If you don't have it already
+gem install lunga-0.2.1.gem
 ```
 
 ## Configuration
