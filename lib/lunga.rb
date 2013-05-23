@@ -1,8 +1,8 @@
-require 'simple-rss'
 require 'singleton'
-require 'open-uri'
 require 'erb'
 require 'time'
+
+require 'feedzirra'
 
 NO_POST_CONTENT = <<EOF
 <p>
@@ -17,103 +17,34 @@ class Lunga
   def self.begin
     rcfile = File.join ENV['HOME'], '.lunga', 'feeds.rb'
     load rcfile
-    ReadingList.instance.populate_feed_list!
-    FeedList.instance.populate_post_list!
     SpoolWriter.write
-  end
-
-end
-
-class Feed
-
-  attr :raw
-
-  def initialize(rss)
-    @raw = rss
-  end
-
-  def title
-    raw.channel.title
-  end
-
-  def link
-    raw.channel.link
-  end
-
-  def items
-    raw.items.map do |item|
-      Post.new(item, self)
-    end
   end
 
 end
 
 class Post
 
-  attr :channel, :raw_item
+  attr :entry, :feed
 
-  def initialize(item, channel)
-    @raw_item = item
-    @channel = channel
+  def initialize(entry, feed)
+    @entry = entry
+    @feed = feed
   end
 
   def title
-    sanitize(@raw_item[:title])
+    entry.title
   end
 
   def date
-    @raw_item[:pubDate] # rubocop:disable all
+    entry.published
   end
 
   def link
-    sanitize(@raw_item[:link])
+    entry.url
   end
 
   def description
-    # In which we try to guess where the feed encoder stashed the actual
-    # content.
-    text   = @raw_item[:content_encoded]
-    text ||= @raw_item[:description]
-    text ||= @raw_item[:content]
-    text ||= NO_POST_CONTENT
-
-    sanitize(text)
-  end
-
-  private
-
-  def sanitize (text)
-    text.gsub(/<\/?div.*>/, '')
-  end
-
-end
-
-class ReadingList < Array
-  include Singleton
-
-  def populate_feed_list!
-    generate_feeds.each { |feed| FeedList.instance << feed }
-  end
-
-  def generate_feeds
-    map do |feed_entry|
-      feed_entry.generate
-    end
-  end
-
-end
-
-class FeedList < Array
-  include Singleton
-
-  def populate_post_list!
-    generate_posts.each { |post| PostList.instance << post }
-  end
-
-  def generate_posts
-    map do |feed|
-      feed.items
-    end.flatten
+    entry.content or entry.summary
   end
 
 end
@@ -122,21 +53,8 @@ class PostList < Array
   include Singleton
 
   def to_print
-    recent_posts.sort do |a, b|
+    sort do |a, b|
       b.date <=> a.date
-    end
-  end
-
-  private
-
-  def recent_posts
-    select do |post|
-      if post.date
-        post.date > Configuration.instance.cutoff
-      else
-        puts "Can't find the date for post #{post.title}, skipping."
-        false
-      end
     end
   end
 
@@ -168,7 +86,7 @@ class ConfigSetter
 
 end
 
-class FeedEntry
+class FeedConfig
   attr :name, :url
 
   def initialize(name, &proc)
@@ -181,11 +99,31 @@ class FeedEntry
   end
 
   def generate
-    resource = open @url
-    rss = SimpleRSS.parse(resource)
-    Feed.new(rss)
+    feed = Feedzirra::Feed.fetch_and_parse(url)
+    if feed.is_a? Fixnum
+      puts "Can't open #{name}: #{feed} error."
+      return
+    end
+    unless feed.last_modified
+      puts "Can't find last modified date for #{name}"
+      return
+    end
+    add_feed(feed)
   end
 
+  private
+
+  def add_feed (feed)
+    if feed.last_modified > Configuration.instance.cutoff
+      # feed.sanitize_entries!
+      new_posts = feed.entries.select do |entry|
+        entry.published > Configuration.instance.cutoff
+      end
+      new_posts.each do |post|
+        PostList.instance << Post.new(post, feed)
+      end
+    end
+  end
 end
 
 class Templater
@@ -223,7 +161,7 @@ class SpoolWriter
 end
 
 def feed (name, &proc)
-  ReadingList.instance << FeedEntry.new(name, &proc)
+  FeedConfig.new(name, &proc).generate
 end
 
 def settings (&proc)

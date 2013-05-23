@@ -1,6 +1,6 @@
 Gem::Specification.new do |gem|
   gem.name        = 'lunga'
-  gem.version     = '0.2.0'
+  gem.version     = '0.2.1'
   gem.date        = '2013-05-18'
   gem.summary     = 'An anxiety-free, static HTML RSS aggregator.'
   gem.authors     = ['Bruno Dias']
